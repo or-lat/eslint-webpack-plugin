@@ -48,12 +48,13 @@ export default function linter(options) {
   }
 
   async function report() {
-    // Filter out ignored files.
-    const results = await removeIgnoredWarnings(
-      eslint,
-      // Get the current results, resetting the rawResults to empty
-      await flatten(rawResults.splice(0, rawResults.length))
-    );
+    // // Filter out ignored files.
+    // const results = await removeIgnoredWarnings(
+    //   eslint,
+    //   // Get the current results, resetting the rawResults to empty
+    //   await flatten(rawResults.splice(0, rawResults.length))
+    // );
+    const results = await flatten(rawResults);
 
     // do not analyze if there are no results or eslint config
     if (!results || results.length < 1) {
@@ -221,33 +222,6 @@ async function loadFormatter(eslint, formatter) {
   }
 
   return eslint.loadFormatter();
-}
-
-/**
- * @param {ESLint} eslint
- * @param {LintResult[]} results
- * @returns {Promise<LintResult[]>}
- */
-async function removeIgnoredWarnings(eslint, results) {
-  const filterPromises = results.map(async (result) => {
-    // Short circuit the call to isPathIgnored.
-    //   fatal is false for ignored file warnings.
-    //   ruleId is unset for internal ESLint errors.
-    //   line is unset for warnings not involving file contents.
-    const ignored =
-      result.messages.length === 0 ||
-      (result.warningCount === 1 &&
-        result.errorCount === 0 &&
-        !result.messages[0].fatal &&
-        !result.messages[0].ruleId &&
-        !result.messages[0].line &&
-        (await eslint.isPathIgnored(result.filePath)));
-
-    return ignored ? false : result;
-  });
-
-  // @ts-ignore
-  return (await Promise.all(filterPromises)).filter((result) => !!result);
 }
 
 /**
