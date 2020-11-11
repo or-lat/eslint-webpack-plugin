@@ -54,7 +54,7 @@ export default function linter(options) {
     //   // Get the current results, resetting the rawResults to empty
     //   await flatten(rawResults.splice(0, rawResults.length))
     // );
-    const results = await flatten(rawResults);
+    const results = await flatten(rawResults.splice(0, rawResults.length));
 
     // do not analyze if there are no results or eslint config
     if (!results || results.length < 1) {
